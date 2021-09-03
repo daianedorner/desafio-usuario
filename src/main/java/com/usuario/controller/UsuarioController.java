@@ -2,7 +2,6 @@ package com.usuario.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +21,7 @@ public class UsuarioController {
 	@Autowired
 	private UsuarioService usuarioService;
 
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping
 	public ResponseEntity<Usuario> save(@RequestBody Usuario user) throws Exception {
 		try {
 			Usuario userRetorno = this.usuarioService.save(user);
@@ -33,7 +32,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PostMapping(value = "/acessar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/acessar")
 	public ResponseEntity<Object> acessar(@RequestBody UsuarioDTO user) throws Exception {
 		try {
 			return this.usuarioService.acessar(user);
@@ -43,7 +42,7 @@ public class UsuarioController {
 		}
 	}
 
-	@GetMapping(value = "/consultar/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/consultar/{id}")
 	public ResponseEntity<Object> consultar(@PathVariable("id") long id) throws Exception {
 		try {
 			return this.usuarioService.consultar(id);
