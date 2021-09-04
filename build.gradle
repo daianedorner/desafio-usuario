@@ -13,10 +13,11 @@ plugins {
 
 apply plugin: 'com.google.cloud.tools.appengine'
 apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
 
 jar {
-    baseName = 'app'
-    version = '0.0.1'
+    archiveFileName = 'app'
+    archiveVersion = '0.0.1'
     manifest {
         attributes('Main-Class': 'com.usuario.DesafioUsuarioApplication')
     }
