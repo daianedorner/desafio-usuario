@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,24 +81,24 @@ public class UsuarioImpl implements UsuarioService {
 	public ResponseEntity<Object> consultar(long id) {
 		// Caso o token exista, e seja o mesmo persistido, buscar o usuário pelo id
 		// passado no path.
-		Usuario user = this.usuarioRepository.getById(id);
-		if (user == null) {
-			// Caso o usuário não seja encontrado pelo id, retornar com status e mensagem de
-			// erro apropriados.
+		try {
+			Usuario user = this.usuarioRepository.getById(id);
+
+			int diff = this.minutesDiff(Calendar.getInstance().getTime(), user.getLastLogin());
+			if (diff > 30) {
+				/*
+				 * Verificar se o último login foi há MENOS de 30 minutos atrás. Caso não seja
+				 * há MENOS de 30 minutos atrás, retornar erro com status apropriado e com a
+				 * mensagem "Sessão inválida".
+				 */
+				return new ResponseEntity<>(new ErroSistema("Sessão inválida"), HttpStatus.UNAUTHORIZED);
+			}
+
+			return new ResponseEntity<>(user, HttpStatus.OK);
+		} catch (EntityNotFoundException e) {
+			System.out.println("ERRO >>> " + e.getMessage());
 			return new ResponseEntity<>(new ErroSistema("Não autorizado"), HttpStatus.UNAUTHORIZED);
 		}
-
-		int diff = this.minutesDiff(Calendar.getInstance().getTime(), user.getLastLogin());
-		if (diff > 30) {
-			/*
-			 * Verificar se o último login foi há MENOS de 30 minutos atrás. Caso não seja
-			 * há MENOS de 30 minutos atrás, retornar erro com status apropriado e com a
-			 * mensagem "Sessão inválida".
-			 */
-			return new ResponseEntity<>(new ErroSistema("Sessão inválida"), HttpStatus.UNAUTHORIZED);
-		}
-
-		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 
 	private int minutesDiff(Date earlierDate, Date laterDate) {
