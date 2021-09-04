@@ -8,19 +8,20 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.servlet.HandlerMapping;
 
 public class JWTAuthenticationFilter extends GenericFilterBean {
-	
+
 	private JwtTokenUtil jwtTokenUtil;
-	
+
 	public JWTAuthenticationFilter(JwtTokenUtil tokenProvider) {
-        this.jwtTokenUtil = tokenProvider;
-    }
+		this.jwtTokenUtil = tokenProvider;
+	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -28,8 +29,10 @@ public class JWTAuthenticationFilter extends GenericFilterBean {
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		String jwt = this.resolveToken(httpServletRequest);
 
+		Long id = getParameterId(httpServletRequest);
+
 		if (StringUtils.hasText(jwt)) {
-			if (this.jwtTokenUtil.validateToken(jwt)) {
+			if (this.jwtTokenUtil.validateToken(jwt, id)) {
 				Authentication authentication = JwtTokenUtil.getAuthentication((HttpServletRequest) request);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
@@ -51,6 +54,16 @@ public class JWTAuthenticationFilter extends GenericFilterBean {
 			return jwt;
 		}
 		return null;
+	}
+
+	private Long getParameterId(HttpServletRequest request) {
+		Long id = null;
+		String urlTail = new AntPathMatcher().extractPathWithinPattern("/{id}/**", request.getRequestURI());
+		if (urlTail != null && !urlTail.isEmpty() && urlTail.indexOf("consultar") >= 0) {
+			urlTail = urlTail.replace("consultar/", "");
+			id = Long.valueOf(urlTail);
+		}
+		return id;
 	}
 
 }

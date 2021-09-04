@@ -82,7 +82,7 @@ public class JwtTokenUtil implements Serializable {
 		return null;
 	}
 
-	public boolean validateToken(String authToken) {
+	public boolean validateToken(String authToken, Long id) {
 		try {
 			Jwts.parser().setSigningKey(secret).parseClaimsJws(authToken);
 
@@ -92,7 +92,8 @@ public class JwtTokenUtil implements Serializable {
 			// apropriado e com a mensagem "Não autorizado".
 			List<Usuario> user = this.cadastroUsuarioRepository.findAllEmail(username);
 			if (user != null && user.size() > 0) {
-				if (user.get(0).getToken() != null && user.get(0).getToken().equals(authToken)) {
+				if (user.get(0).getToken() != null && user.get(0).getToken().equals(authToken) && id != null
+						&& id.longValue() == user.get(0).getId()) {
 					return true;
 				} else {
 					return false;
